@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="index.css">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <!-- Authentication Section -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-form-container" id="loginFormContainer">
+            <div class="logo">
+                <i class="fas fa-heartbeat logo-icon"></i>
+                <span class="logo-text">HealthCare+</span>
+            </div>
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <p id="loginError" class="error-message"></p>
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <p class="auth-toggle">Don't have an account? <a href="#" id="showSignUpLink">Sign Up</a></p>
+        </div>
+        
+        <div class="auth-form-container hidden" id="signUpFormContainer">
+            <div class="logo">
+                <i class="fas fa-heartbeat logo-icon"></i>
+                <span class="logo-text">HealthCare+</span>
+            </div>
+            <h2>Create an Account</h2>
+            <form id="signUpForm">
+                <p id="signUpError" class="error-message"></p>
+                <div class="form-group">
+                    <label for="signUpName">Full Name</label>
+                    <input type="text" id="signUpName" required>
+                </div>
+                <div class="form-group">
+                    <label for="signUpDob">Date of Birth</label>
+                    <input type="date" id="signUpDob" required>
+                </div>
+                <div class="form-group">
+                    <label for="signUpEmail">Email</label>
+                    <input type="email" id="signUpEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="signUpPassword">Password</label>
+                    <input type="password" id="signUpPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+            <p class="auth-toggle">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="appContainer" class="hidden">
+        <!-- Header Section -->
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-heartbeat logo-icon"></i>
+                        <span class="logo-text">HealthCare+</span>
+                    </div>
+                    <div class="header-actions">
+                        <button class="profile-btn" id="profileBtn">
+                            <i class="fas fa-user"></i>
+                            My Profile
+                        </button>
+                        <button class="logout-btn" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Section -->
+        <main class="container">
+            <section class="welcome-section">
+                <h1>Healthcare Services</h1>
+                <p>Your complete healthcare management solution. Access appointments, medical records, and nearby hospitals all in one place.</p>
+                
+                <div class="services-grid">
+                    <div class="service-card" id="appointmentsBtn">
+                        <i class="fas fa-calendar-check service-icon"></i>
+                        <h3>Appointments</h3>
+                        <p>View and manage your upcoming medical appointments</p>
+                    </div>
+                    
+                    <div class="service-card" id="hospitalsBtn">
+                        <i class="fas fa-hospital service-icon"></i>
+                        <h3>Hospitals</h3>
+                        <p>Find hospitals and healthcare facilities near you</p>
+                    </div>
+                    
+                    <div class="service-card" id="recordsBtn">
+                        <i class="fas fa-file-medical service-icon"></i>
+                        <h3>Patient Records</h3>
+                        <p>Access your medical history and health records</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic Content Sections -->
+            <section class="content-section" id="appointmentsContent">
+                <div class="content-header">
+                    <h2>My Appointments</h2>
+                    <button class="back-btn" id="backFromAppointments">
+                        <i class="fas fa-arrow-left"></i> Back to Services
+                    </button>
+                </div>
+
+                <!-- Calendar View -->
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prevMonthBtn" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="currentMonthYear"></h3>
+                        <button id="nextMonthBtn" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div class="calendar-days" id="calendarDays"></div>
+                </div>
+
+                <div class="appointments-view-header">
+                    <h4 id="appointmentsListTitle">All Upcoming Appointments</h4>
+                    <button id="showAllAppointmentsBtn" class="back-btn hidden"><i class="fas fa-list"></i> Show All</button>
+                </div>
+
+                <div class="appointment-list" id="appointmentList">
+                    <div class="loader" id="appointmentsLoader"></div>
+                    <!-- Appointments will be dynamically added here -->
+                </div>
+                
+                <!-- Book New Appointment Section -->
+                <div class="book-appointment-section">
+                    <button class="book-appointment-btn" id="bookAppointmentBtn">
+                        <i class="fas fa-plus"></i> Book New Appointment
+                    </button>
+                    
+                    <div class="appointment-form" id="appointmentForm">
+                        <h3>Book a New Appointment</h3>
+                        <form id="bookingForm">
+                            <div class="form-group">
+                                <label for="doctorSelect">Select Doctor</label>
+                                <div class="doctors-grid" id="doctorsGrid">
+                                    <div class="loader" id="doctorsLoader"></div>
+                                    <!-- Doctors will be dynamically added here -->
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="appointmentDate">Appointment Date</label>
+                                    <input type="date" id="appointmentDate" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="appointmentTime">Appointment Time</label>
+                                    <select id="appointmentTime" required>
+                                        <option value="">Select Time</option>
+                                        <!-- Time slots will be dynamically added -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="appointmentReason">Reason for Appointment</label>
+                                <textarea id="appointmentReason" rows="3" placeholder="Briefly describe your symptoms or reason for visit" required></textarea>
+                            </div>
+                            
+                            <button type="submit" class="submit-btn" id="submitBtn">Book Appointment</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section" id="hospitalsContent">
+                <div class="content-header">
+                    <h2>Nearby Hospitals</h2>
+                    <button class="back-btn" id="backFromHospitals">
+                        <i class="fas fa-arrow-left"></i> Back to Services
+                    </button>
+                </div>
+                <div class="search-bar-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="search" id="hospitalSearchInput" placeholder="Search by name or location...">
+                </div>
+                <div class="hospital-list" id="hospitalList">
+                    <!-- Hospitals will be dynamically rendered here -->
+                </div>
+            </section>
+
+            <section class="content-section" id="recordsContent">
+                <div class="content-header">
+                    <h2>My Medical Records</h2>
+                    <button class="back-btn" id="backFromRecords">
+                        <i class="fas fa-arrow-left"></i> Back to Services
+                    </button>
+                </div>
+                <div class="records-list">
+                    <div class="record-item">
+                        <i class="fas fa-file-medical record-icon"></i>
+                        <div class="record-info">
+                            <h4>Annual Physical Examination</h4>
+                            <p>Complete health checkup and lab tests</p>
+                            <p class="record-date">September 12, 2023</p>
+                        </div>
+                    </div>
+                    <div class="record-item">
+                        <i class="fas fa-file-medical record-icon"></i>
+                        <div class="record-info">
+                            <h4>Cardiology Consultation</h4>
+                            <p>Heart health evaluation and ECG report</p>
+                            <p class="record-date">July 28, 2023</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content-section" id="profileContent">
+                <div class="content-header">
+                    <h2>My Profile</h2>
+                    <div class="content-header-actions">
+                        <button class="edit-profile-btn" id="editProfileBtn">
+                            <i class="fas fa-pencil-alt"></i> Edit Profile
+                        </button>
+                        <button class="back-btn" id="backFromProfile">
+                            <i class="fas fa-arrow-left"></i> Back to Services
+                        </button>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-pic">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <!-- View Mode -->
+                    <div class="profile-details" id="profileDetailsView">
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name:</span>
+                            <span class="detail-value" id="profileName"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date of Birth:</span>
+                            <span class="detail-value" id="profileDob"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value" id="profileEmail"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phone Number:</span>
+                            <span class="detail-value" id="profilePhone"></span>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <form class="profile-details hidden" id="profileDetailsEdit">
+                        <div class="form-group">
+                            <label for="editProfileName">Full Name</label>
+                            <input type="text" id="editProfileName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editProfileDob">Date of Birth</label>
+                            <input type="date" id="editProfileDob">
+                        </div>
+                        <div class="form-group">
+                            <label for="editProfileEmail">Email</label>
+                            <input type="email" id="editProfileEmail" disabled>
+                        </div>
+                         <div class="form-group">
+                            <label for="editProfilePhone">Phone Number</label>
+                            <input type="tel" id="editProfilePhone" placeholder="(555) 123-4567">
+                        </div>
+                        <div class="profile-edit-actions">
+                             <button type="button" class="cancel-btn" id="cancelEditProfileBtn">Cancel</button>
+                             <button type="submit" class="submit-btn">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="content-section" id="referencesContent">
+                <div class="content-header">
+                    <h2>References</h2>
+                    <button class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Back to Services
+                    </button>
+                </div>
+                <div class="references-list" id="referencesList">
+                    <!-- References will be dynamically added here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer Section -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <button class="contact-btn" id="contactBtn">
+                        <i class="fas fa-phone-alt"></i>
+                        Contact Us
+                    </button>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">About Us</a>
+                        <a href="#">FAQ</a>
+                        <a href="#" id="referencesLink">References</a>
+                    </div>
+                    <div class="copyright">
+                        &copy; 2023 HealthCare+ Management System. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- AI Doctor Chatbot -->
+        <div class="chatbot-container">
+            <div class="chatbot-window" id="chatbotWindow">
+                <div class="chatbot-header">
+                    <i class="fas fa-robot"></i>
+                    <h3>AI Health Assistant</h3>
+                    <button class="chatbot-close" id="chatbotClose">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="chatbot-messages" id="chatbotMessages">
+                    <div class="message bot-message">
+                        Hello! I'm your AI Health Assistant. How can I help you today? You can ask me about symptoms, medications, or general health advice.
+                    </div>
+                </div>
+                <div class="typing-indicator" id="typingIndicator">
+                    AI Health Assistant is typing...
+                </div>
+                <div class="chatbot-quick-replies" id="chatbotQuickReplies"></div>
+                <div class="chatbot-input">
+                    <input type="text" id="chatbotInput" placeholder="Type your health question...">
+                    <button id="chatbotSend">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <button class="chatbot-toggle" id="chatbotToggle">
+                <i class="fas fa-comment-dots"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Your Appointment</h2>
+                <button id="closeModalBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="modalAppointmentDetails">
+                    <!-- Details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelBookingBtn" class="btn btn-secondary">Cancel</button>
+                <button id="confirmBookingBtn" class="btn btn-primary">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="index.tsx"></script>
+</body>
+</html>
