@@ -1,8 +1,12 @@
 
 
+import { inject } from "@vercel/analytics";
 import { GoogleGenAI, Chat, Type } from "@google/genai";
 // @ts-ignore
 const axios = window.axios;
+
+// Initialize Vercel Web Analytics
+inject();
 
 // --- DOM ELEMENTS ---
 
