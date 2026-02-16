@@ -319,6 +319,11 @@ main {
     color: #ffb74d;
 }
 
+.status-cancelled {
+    background: rgba(229, 57, 53, 0.2);
+    color: #ef9a9a;
+}
+
 /* Calendar Styles */
 .calendar-container {
     padding: 20px;
