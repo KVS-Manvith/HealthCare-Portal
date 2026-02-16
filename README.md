@@ -152,10 +152,33 @@ If you want backend + PostgreSQL without managing a server:
    - `healthcare-backend` web service
    - `healthcare-db` PostgreSQL database
 3. In backend service env vars, set:
-   - `CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>`
+   - `APP_CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>`
 4. Deploy and copy backend URL (for example `https://healthcare-backend.onrender.com`).
 5. In Vercel frontend env vars, set:
    - `VITE_API_URL=https://<your-render-backend-domain>/api`
+
+## Backend on Oracle Always Free (100% Free)
+
+Use this if you want fully free hosting for backend + PostgreSQL.
+
+1. Create an Oracle Always Free VM (Ubuntu).
+2. Open inbound ports in OCI Security List: `22`, `80`, `443`.
+3. SSH into VM and install Docker + Compose plugin.
+4. Clone repo on VM:
+   - `git clone https://github.com/KVS-Manvith/HealthCare-Portal.git`
+   - `cd HealthCare-Portal`
+5. Create env file:
+   - `cp .env.oracle.example .env.oracle`
+   - Set `API_DOMAIN`, `LETSENCRYPT_EMAIL`, `APP_CORS_ALLOWED_ORIGINS`, and strong secrets.
+6. Run backend stack:
+   - `docker compose -f docker-compose.oracle.yml --env-file .env.oracle up -d --build`
+7. In Vercel frontend env vars, set:
+   - `VITE_API_URL=https://<your-api-domain>/api`
+
+Oracle deployment files:
+- `docker-compose.oracle.yml`
+- `.env.oracle.example`
+- `infra/caddy/Caddyfile.backend`
 
 ## API Summary
 
