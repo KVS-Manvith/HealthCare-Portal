@@ -143,6 +143,20 @@ Set repository secrets:
 
 Then run `.github/workflows/deploy-production.yml` and choose an `image_tag`.
 
+## Backend on Render (PostgreSQL)
+
+If you want backend + PostgreSQL without managing a server:
+
+1. In Render, create a new Blueprint and select this repo.
+2. Render will detect `render.yaml` and create:
+   - `healthcare-backend` web service
+   - `healthcare-db` PostgreSQL database
+3. In backend service env vars, set:
+   - `CORS_ALLOWED_ORIGINS=https://<your-vercel-domain>`
+4. Deploy and copy backend URL (for example `https://healthcare-backend.onrender.com`).
+5. In Vercel frontend env vars, set:
+   - `VITE_API_URL=https://<your-render-backend-domain>/api`
+
 ## API Summary
 
 ### Public
